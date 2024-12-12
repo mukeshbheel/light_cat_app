@@ -3,13 +3,13 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider_project/model/catInfo.dart';
+import 'package:provider_project/utils/global.dart';
 import 'package:uuid/uuid.dart';
 
 class CatInfoController extends ChangeNotifier{
@@ -17,7 +17,7 @@ class CatInfoController extends ChangeNotifier{
   CatInfoController(){
     getNewCat();
   }
-  String  _catImageDemo = "https://images.unsplash.com/photo-1482434368596-fbd06cae4f89?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+  final String  _catImageDemo = "https://images.unsplash.com/photo-1482434368596-fbd06cae4f89?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
   String  _catName = "Meow";
   String  _catImage = "https://images.unsplash.com/photo-1482434368596-fbd06cae4f89?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
   final String _getCatUrl = "https://api.thecatapi.com/v1/images/search";
@@ -32,6 +32,8 @@ class CatInfoController extends ChangeNotifier{
 
   bool _isBookmarked = false;
   bool get isBookmarked => _isBookmarked;
+
+  Color randomColor = Colors.white;
 
 
 
@@ -66,7 +68,8 @@ class CatInfoController extends ChangeNotifier{
 
   void getNewCat() async{
     log("getNewCat called");
-    id = Uuid().v1();
+    randomColor = colorFromString(getRandomColorString());
+    id = const Uuid().v1();
     setGetLoading(true);
     try{
       final res = await http.get(Uri.parse(_getCatUrl));
@@ -128,12 +131,9 @@ class CatInfoController extends ChangeNotifier{
         final file = File(filePath);
         await file.writeAsBytes(response.bodyBytes);
 
-        print('Image downloaded and saved to $filePath');
       } else {
-        print('Failed to download image. Status code: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error downloading image: $e');
     }
   }
 
@@ -172,7 +172,17 @@ class CatInfoController extends ChangeNotifier{
           await file.writeAsBytes(imageData);
 
           log("Image saved to: $filePath");
-          SnackBar snackBar = SnackBar( shape: RoundedRectangleBorder(side: BorderSide(color: Colors.white)), backgroundColor: Colors.black, content: Text('${fileName.toUpperCase()} Saved to Gallery',style: TextStyle(color: Colors.white),));
+          SnackBar snackBar = SnackBar( elevation: 0,margin: const EdgeInsets.all(20), behavior: SnackBarBehavior.floating, backgroundColor: Colors.transparent, content: Container(height: 50,
+              decoration: BoxDecoration(
+                gradient:  LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.black,
+                      randomColor,
+                    ]),
+                borderRadius: BorderRadius.circular(10),
+              ),child: Center(child: Text('${fileName.toUpperCase()} Saved to Gallery',style: const TextStyle(color: Colors.white),))));
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
         } else {
           log("Failed to fetch image. Status: ${response.statusCode}");

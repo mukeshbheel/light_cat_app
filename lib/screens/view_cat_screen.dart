@@ -27,9 +27,11 @@ class _ViewCatScreenState extends State<ViewCatScreen> {
   }
 
   updateName(BuildContext context) {
+    final providerCat = Provider.of<CatInfoController>(context, listen: false);
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
+          backgroundColor: Colors.transparent,
               contentPadding: const EdgeInsets.all(5),
               actionsPadding:
                   const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
@@ -37,17 +39,18 @@ class _ViewCatScreenState extends State<ViewCatScreen> {
                   borderRadius: BorderRadius.circular(10)),
               content: Container(
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [Colors.white, Colors.black87]),
+                      colors: [providerCat.randomColor.withOpacity(0.005),
+                        Colors.black,]),
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: const [
-                    BoxShadow(
-                        color: Colors.grey,
-                        blurRadius: 5,
-                        spreadRadius: 2,
-                        offset: Offset(1, 5))
+                    // BoxShadow(
+                        // color: Colors.grey,
+                        // blurRadius: 5,
+                        // spreadRadius: 2,
+                        // offset: Offset(1, 5))
                   ],
                 ),
                 padding: const EdgeInsets.all(16.0),
@@ -104,8 +107,8 @@ class _ViewCatScreenState extends State<ViewCatScreen> {
                                   // colorString != null
                                   //     ? colorFromString(colorString!)
                                   //     : Colors.white,
-                                  Colors.black87,
-                                  Colors.black87,
+                                  Colors.white,
+                                  Colors.white,
                                 ]),
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: const [
@@ -116,11 +119,8 @@ class _ViewCatScreenState extends State<ViewCatScreen> {
                                   offset: Offset(1, 5))
                             ],
                           ),
-                          child: const Center(
-                              child: Text(
-                            "Done",
-                            style: TextStyle(color: Colors.white),
-                          )),
+                          child: Center(
+                              child: Image.asset("assets/images/done.png", width: 30, height: 30,)),
                         ),
                       ),
                     ),
@@ -139,11 +139,8 @@ class _ViewCatScreenState extends State<ViewCatScreen> {
                                 begin: Alignment.topCenter,
                                 end: Alignment.bottomCenter,
                                 colors: [
-                                  // colorString != null
-                                  //     ? colorFromString(colorString!)
-                                  //     : Colors.white,
-                                  Colors.black87,
-                                  Colors.black87,
+                                  Colors.white,
+                                  Colors.white,
                                 ]),
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: const [
@@ -154,11 +151,8 @@ class _ViewCatScreenState extends State<ViewCatScreen> {
                                   offset: Offset(1, 5))
                             ],
                           ),
-                          child: const Center(
-                              child: Text(
-                            "Cancel",
-                            style: TextStyle(color: Colors.white),
-                          )),
+                          child: Center(
+                              child: Image.asset("assets/images/cross.png", width: 30, height: 30,)),
                         ),
                       ),
                     ),
@@ -172,13 +166,26 @@ class _ViewCatScreenState extends State<ViewCatScreen> {
   Widget build(BuildContext context) {
     final providerCat = Provider.of<CatInfoController>(context);
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.black.withOpacity(0.1),
         // centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
+        leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: Image.asset(
+              "assets/images/back.png",
+              width: 20,
+              height: 20,
+            )),
         title: Text(
           catName.toUpperCase(),
-          style: const TextStyle(color: Colors.white, fontSize: 18),
+          style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold),
         ),
       ),
       body: Stack(
@@ -186,7 +193,12 @@ class _ViewCatScreenState extends State<ViewCatScreen> {
           Container(
             width: double.infinity,
             height: double.infinity,
-            color: Colors.black,
+            decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [
+              Colors.white,
+              providerCat.randomColor.withOpacity(0.005)
+            ])),
+            // alignment: Alignment.topCenter,
             // height: MediaQuery.of(context).size.height-70,
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
             child: ClipRRect(
@@ -196,7 +208,7 @@ class _ViewCatScreenState extends State<ViewCatScreen> {
                 )),
           ),
           Positioned(
-            bottom: 0,
+            bottom: 20,
             left: 0,
             right: 0,
             child: Padding(
@@ -204,21 +216,46 @@ class _ViewCatScreenState extends State<ViewCatScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  IconButton(
-                      onPressed: () {
-                        updateName(context);
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.black,
+                        providerCat.randomColor
+                      ],
+                    )),
+                    child: IconButton(
+                        onPressed: () {
+                          updateName(context);
+                        },
+                        icon: const Icon(
+                          Icons.edit,
+                          color: Colors.white,
+                        )),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.black,
+                            providerCat.randomColor
+                          ],
+                        )),
+                    child: IconButton(
+                      onPressed: () async {
+                        await providerCat.saveImageManually(
+                            context, widget.catInfo.imageUrl, catName);
                       },
                       icon: const Icon(
-                        Icons.edit,
+                        Icons.save,
                         color: Colors.white,
-                      )),
-                  IconButton(
-                    onPressed: () async {
-                      await providerCat.saveImageManually( context, widget.catInfo.imageUrl, catName);
-                    },
-                    icon: const Icon(
-                      Icons.save,
-                      color: Colors.white,
+                      ),
                     ),
                   ),
                 ],
@@ -226,13 +263,18 @@ class _ViewCatScreenState extends State<ViewCatScreen> {
             ),
           ),
           Consumer<CatInfoController>(builder: (context, catInfoController, _) {
-            return catInfoController.saveImageLoading ? Container(
-            width: double.infinity,
-            height: double.infinity,
-            color: Colors.black.withOpacity(0.8),
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-            child: const CupertinoActivityIndicator(color: Colors.white,),
-            ):const SizedBox();
+            return catInfoController.saveImageLoading
+                ? Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    color: Colors.black.withOpacity(0.8),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 20),
+                    child: const CupertinoActivityIndicator(
+                      color: Colors.white,
+                    ),
+                  )
+                : const SizedBox();
           }),
         ],
       ),
